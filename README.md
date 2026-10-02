@@ -2,11 +2,11 @@
 
 **4-DOF Manipulator Design, MATLAB/Simscape Validation & TM Collaborative-Robot Experiments**
 
-Academic industrial-robotics project combining the design and simulation of a custom **4-DOF Rz–Ry–Ry–Ry manipulator** for helmet-visor automation with physical laboratory experiments using a **TM collaborative robot**, machine vision, block-based robot programming and multiple manipulation tasks.
+Academic industrial-robotics project combining the design and simulation of a custom **4-DOF Rz–Ry–Ry–Ry serial manipulator** for helmet-visor manipulation and inspection with physical laboratory experiments using a **TM collaborative robot**, machine vision and block-based industrial robot programming.
 
 > **Status:** Completed academic team project  
 > **Team size:** 3  
-> **Primary tools:** MATLAB, Simulink, Simscape Multibody, SolidWorks, TM Robot programming & vision environment
+> **Tools:** MATLAB, Simulink, Simscape Multibody, SolidWorks, TM Robot programming & vision environment
 
 ---
 
@@ -14,242 +14,31 @@ Academic industrial-robotics project combining the design and simulation of a cu
 
 | | |
 |---|---|
-| **Main simulation task** | Design a 4-DOF manipulator capable of manipulating and inspecting a helmet visor |
-| **Robot architecture** | 4 revolute joints: base, shoulder, elbow, wrist |
-| **Joint-axis sequence** | Rz – Ry – Ry – Ry |
+| **Main simulation task** | Design a manipulator capable of opening a helmet visor and positioning for hinge inspection |
+| **Robot architecture** | 4 revolute joints: base, shoulder, elbow and wrist |
+| **Joint axes** | Rz – Ry – Ry – Ry |
+| **Task-specific IK** | Base held fixed, leaving 3 active joints |
 | **Simulation** | MATLAB + Simscape Multibody |
-| **Analysis** | FK, Jacobian, IK, workspace, manipulability, dynamics, torque, payload |
-| **Task trajectories** | Visor manipulation trajectory and camera-inspection trajectory |
-| **Validation** | MATLAB analytical/dynamic results compared with Simscape simulation |
+| **Analysis** | FK, Jacobian, IK, workspace, manipulability, dynamics, torque and payload |
+| **Trajectory planning** | Visor manipulation and camera-inspection trajectories |
+| **Validation** | MATLAB dynamic calculations compared with Simscape results |
 | **Physical robotics** | TM collaborative robot |
-| **Lab tasks** | Pick-and-place, vision-guided tic-tac-toe, contact drawing, visor manipulation, hinge imaging and stamping |
-| **Vision** | Pattern detection with configurable search area, score threshold, rotation and image-pyramid parameters |
+| **Lab tasks** | Pick-and-place, machine vision, tic-tac-toe, contact drawing, visor manipulation, hinge imaging and stamping |
 
 ---
 
 # Project Overview
 
-This project consisted of two connected parts:
+The project contained two connected areas of industrial robotics work:
 
-1. **Design and simulation of a custom 4-DOF industrial manipulator**
-2. **Physical manipulation experiments using a TM collaborative robot**
+1. **Design, modelling and simulation of a custom 4-DOF manipulator**
+2. **Physical industrial-robot experiments using a TM collaborative robot**
 
-The main simulated task was based around a **helmet visor**.
+The custom manipulator was designed around a helmet-visor automation task.
 
-The custom robot had to perform two task trajectories:
+Two principal trajectories were studied.
 
-```text
-Trajectory ABC
-Visor Manipulation
-        ↓
-Approach Helmet
-        ↓
-Reach Visor
-        ↓
-Manipulate / Open Visor
-```
-
-and:
-
-```text
-Trajectory ADE
-Inspection Motion
-        ↓
-Approach Helmet
-        ↓
-Move Around Visor
-        ↓
-Position Camera for Inspection
-```
-
-The project therefore required more than producing robot motion in simulation.
-
-It included:
-
-- mechanical design
-- kinematic modelling
-- workspace analysis
-- inverse kinematics
-- dynamic modelling
-- trajectory planning
-- torque calculation
-- Simscape modelling
-- MATLAB/Simscape comparison
-- payload analysis
-- motor/transmission evaluation
-- physical collaborative-robot programming
-- machine vision
-- manipulation experiments
-
----
-
-# My Contributions
-
-This was a **three-person team project**.
-
-The following sections describe the work I personally contributed to.
-
-## Mechanical & CAD Work
-
-My contributions included:
-
-- CAD modelling of the custom manipulator links
-- defining the robot geometry and link dimensions
-- extracting mass and centre-of-mass information from SolidWorks
-- preparing robot geometry for Simscape integration
-
-The final manipulator used four revolute joints:
-
-```text
-q1 → Base
-q2 → Shoulder
-q3 → Elbow
-q4 → Wrist
-```
-
-with the joint-axis structure:
-
-```text
-Rz → Ry → Ry → Ry
-```
-
----
-
-# Kinematic Modelling
-
-## Forward Kinematics
-
-I implemented the robot forward-kinematics function:
-
-```text
-robotFK(q)
-```
-
-to compute the manipulator pose from the four joint variables.
-
-Conceptually:
-
-```text
-q = [q1 q2 q3 q4]
-        ↓
-Forward Kinematics
-        ↓
-End-Effector Position / Pose
-```
-
----
-
-## Position Jacobian
-
-I implemented a position Jacobian function:
-
-```text
-robotJacobianP(q)
-```
-
-to relate joint velocities to Cartesian end-effector velocity.
-
-Conceptually:
-
-```text
-q̇
- ↓
-Jp(q)
- ↓
-Cartesian Velocity
-```
-
-The Jacobian was also used in workspace/manipulability analysis.
-
----
-
-# Workspace & Manipulability Analysis
-
-The robot workspace was evaluated by sampling the full four-dimensional joint configuration space.
-
-My analysis included:
-
-- full `q1–q4` workspace sampling
-- Cartesian forward-kinematics evaluation
-- manipulability-index calculation
-- 3D workspace visualisation
-- workspace colouring by manipulability
-- convex-hull generation
-- filtering for table height
-- filtering for a base keep-out region
-- fixed-`q1` workspace slices
-- YZ workspace analysis
-- `alphaShape` boundary generation
-- visualisation of an example IK posture inside the workspace
-
-This analysis was used to understand whether the designed manipulator geometry could reach the required helmet-interaction regions before task trajectories were finalised.
-
-<!-- Add later:
-![Workspace and manipulability](media/simulation/workspace_manipulability.png)
--->
-
----
-
-# Inverse Kinematics
-
-A general inverse-kinematics solution was implemented for the custom manipulator.
-
-The IK was written as part of the project rather than relying exclusively on a prebuilt robot model.
-
-The objective was to determine joint configurations:
-
-```text
-q1, q2, q3, q4
-```
-
-for desired Cartesian task positions:
-
-```text
-x, y, z
-```
-
-The IK was then used during task trajectory generation for the visor-interaction and inspection motions.
-
----
-
-# Dynamic Modelling
-
-The manipulator dynamics were derived using the robot equations of motion.
-
-The model followed the standard form:
-
-```text
-M(q) q̈ + C(q,q̇) q̇ + G(q) = τ
-```
-
-where:
-
-- `M(q)` represents configuration-dependent inertia
-- `C(q,q̇)` represents velocity-dependent effects
-- `G(q)` represents gravitational effects
-- `τ` represents required joint torque
-
-The dynamic model was used to estimate torque requirements along the planned trajectories.
-
----
-
-# Trajectory Generation
-
-Joint-space trajectories were generated in MATLAB, including:
-
-- joint position `q`
-- joint velocity `q̇`
-- joint acceleration `q̈`
-
-Different trajectory-generation methods were investigated and compared to determine which was better suited to the individual task segments.
-
----
-
-## Trajectory ABC — Visor Manipulation
-
-Trajectory **ABC** represented the principal visor-interaction motion.
-
-The robot had to:
+### ABC — Visor Manipulation
 
 ```text
 Start
@@ -258,449 +47,556 @@ Approach Helmet
   ↓
 Reach Visor
   ↓
-Manipulate / Open Visor
+Open / Manipulate Visor
 ```
 
-A line-and-parabolic-blend style trajectory was investigated for this motion.
-
-The trajectory was evaluated in both:
-
-- MATLAB
-- Simscape Multibody
-
----
-
-## Trajectory ADE — Camera Inspection
-
-Trajectory **ADE** represented a separate inspection path.
-
-The manipulator moved forward and around the visor to position the camera for inspection of the helmet / hinge region.
-
-Multiple trajectory-generation approaches were investigated and compared for this motion.
-
-The resulting trajectory was also evaluated in both MATLAB and Simscape.
-
----
-
-# MATLAB Dynamic Simulation
-
-For the generated trajectories, MATLAB was used to compute:
+### ADE — Inspection Motion
 
 ```text
-q(t)
-q̇(t)
-q̈(t)
-τ(t)
+Start
+  ↓
+Approach Helmet
+  ↓
+Move Around Visor
+  ↓
+Position for Hinge Inspection
 ```
 
-The resulting joint-torque profiles were used to investigate actuator requirements and payload sensitivity.
+The engineering workflow included:
+
+- mechanical design
+- forward and inverse kinematics
+- Jacobian modelling
+- workspace analysis
+- manipulability analysis
+- robot dynamics
+- trajectory generation
+- MATLAB simulation
+- Simscape Multibody modelling
+- MATLAB-vs-Simscape comparison
+- payload analysis
+- motor and transmission evaluation
+- collaborative-robot programming
+- machine vision
+- physical manipulation experiments
+
+---
+
+# My Contributions
+
+This was a **three-person academic team project**.
+
+My work included:
+
+### Mechanical Design
+- CAD modelling of robot links and end-effector components
+- robot geometry definition
+- link-dimension definition
+- extraction of mass and centre-of-mass information from SolidWorks
+- preparation of geometry for Simscape
+
+### Kinematics & Workspace
+- forward kinematics
+- position Jacobian
+- inverse kinematics
+- workspace sampling
+- manipulability analysis
+- workspace filtering
+- YZ workspace analysis
+- IK posture visualisation
+
+### Dynamics & Simulation
+- derivation of robot dynamics
+- joint-space trajectory generation
+- MATLAB torque calculation
+- Simscape Multibody model development
+- CAD geometry integration
+- joint-position and joint-torque sensing
+- MATLAB-vs-Simscape comparison
+- payload studies
+- motor/transmission evaluation
+
+### Physical Industrial Robotics
+I also worked directly on the TM robot laboratory tasks, including:
+
+- pick-and-place programming
+- tic-tac-toe task logic
+- vision configuration
+- pattern-detection parameter tuning
+- contact drawing
+- visor manipulation
+- camera positioning
+- hinge inspection
+- stamping/contact tasks
+
+---
+
+# Robot Architecture
+
+The designed robot is a **4-DOF serial manipulator**:
+
+```text
+q1 → Base rotation
+q2 → Shoulder
+q3 → Elbow
+q4 → Wrist
+```
+
+with the axis sequence:
+
+```text
+Rz → Ry → Ry → Ry
+```
+
+Some original MATLAB files contain `SCARA` and `3DOF` in their filenames.
+
+These names are preserved because they are part of the original project archive.
+
+The mechanism itself is not a conventional SCARA architecture.
+
+---
+
+# Forward Kinematics
+
+Forward kinematics were implemented to map joint configurations to the end-effector pose.
+
+Conceptually:
+
+```text
+q = [q1 q2 q3 q4]
+        ↓
+Forward Kinematics
+        ↓
+End-Effector Pose
+```
+
+Relevant archived MATLAB functions are available under:
+
+```text
+matlab/kinematics/
+```
+
+including:
+
+```text
+SCARAdir_3DOF.m
+SCARAjac_3DOF.m
+SCARAjacP_3DOF.m
+```
+
+---
+
+# Inverse Kinematics
+
+The full manipulator contains four revolute joints.
+
+For the helmet-visor task, however, the base rotation `q1` was held fixed during the inverse-kinematics calculation.
+
+The task-specific IK therefore operated on:
+
+```text
+q2 → Shoulder
+q3 → Elbow
+q4 → Wrist
+```
+
+giving **three active DOFs**.
+
+This is why several original functions are labelled `3DOF`, even though they belong to the same 4-DOF robot.
+
+The reduced formulation was sufficient for the planned visor-interaction and inspection trajectories because the base orientation remained fixed during those motions.
+
+---
+
+# Workspace & Manipulability Analysis
+
+The manipulator workspace was sampled numerically across the joint configuration space.
+
+The analysis included:
+
+- end-effector workspace sampling
+- manipulability-index calculation
+- 3D workspace visualisation
+- manipulability colouring
+- workspace boundary estimation
+- table-height filtering
+- base keep-out filtering
+- fixed-base YZ workspace analysis
+- IK-target visualisation
+
+## Effective Workspace
+
+![Effective workspace coloured by manipulability](media/simulation/workspace_manipulability.jpeg)
+
+The colour scale represents the normalized position-manipulability index across sampled end-effector configurations.
+
+## Fixed-Base YZ Slice
+
+![YZ workspace slice and IK](media/simulation/workspace_yz_slice.jpeg)
+
+This view illustrates the task-specific fixed-base workspace and example IK solutions.
+
+---
+
+# Dynamic Modelling
+
+The manipulator dynamics were derived using the standard robot equation:
+
+```text
+M(q)q̈ + C(q,q̇)q̇ + G(q) = τ
+```
+
+where:
+
+- `M(q)` — inertia matrix
+- `C(q,q̇)` — velocity-dependent terms
+- `G(q)` — gravity terms
+- `τ` — required joint torque
+
+The archived MATLAB implementation includes separate functions for the dynamic components:
+
+```text
+matlab/dynamics/
+├── SCARAM_3DOF.m
+├── SCARAcoriolis_3DOF.m
+├── SCARAg_3DOF.m
+└── SCARAdirdin_3DOF.m
+```
+
+---
+
+# Trajectory Planning
+
+Multiple trajectory-generation methods were implemented and compared.
+
+The archived code includes:
+
+- trapezoidal profiles
+- custom trapezoidal profiles
+- cubic trajectories
+- cycloidal trajectories
+- spline trajectories
+- line/parabolic-blend approaches
+- minimum-time / rise-time utilities
+
+Relevant files are available under:
+
+```text
+matlab/trajectory/
+```
+
+Two main task paths were then evaluated.
+
+## ABC — Visor Manipulation
+
+Trajectory ABC represented the motion used to approach and manipulate the visor.
+
+Relevant implementation:
+
+```text
+ABC_Trajectory.m
+lines_parabolas_3Joints.m
+```
+
+## ADE — Inspection Path
+
+Trajectory ADE represented the inspection movement around the visor and toward the hinge region.
+
+Relevant implementation:
+
+```text
+Main_ADE.m
+Spline_traj_CDE.m
+SplineCubica.m
+```
+
+Different trajectory methods were compared to determine which behaviour was more appropriate for the specific task.
 
 ---
 
 # Simscape Multibody Model
 
-A complete **4-DOF Simscape Multibody model** was created for the manipulator.
+The manipulator was also implemented in **Simscape Multibody**.
 
-The model development included:
+The model included:
 
 - four revolute joints
-- correct `Rz–Ry–Ry–Ry` axis alignment
-- rigid transforms for link offsets
-- initial geometric solids for development
-- SolidWorks geometry import
-- motion inputs for all four joints
+- correct joint-axis orientation
+- rigid transforms
+- imported CAD geometry
+- commanded joint trajectories
 - joint-position sensing
+- joint-velocity outputs
 - joint-torque sensing
-- Simscape physical-signal conversion
-- simulation output logging
+- simulation-data logging
 
-The high-level model architecture was:
+## Full Multibody Model
+
+![Simscape Multibody model](media/simulation/simscape_model.jpeg)
+
+## Simulation I/O
+
+![Simscape robot I/O overview](media/simulation/simscape_io_overview.jpeg)
+
+Simscape models are available under:
 
 ```text
-Joint Trajectories
-       │
-       ▼
-┌──────────────────────┐
-│  4-DOF Robot Model   │
-│  Simscape Multibody  │
-└──────────────────────┘
-       │
-       ├── Joint Position
-       ├── Joint Velocity
-       └── Joint Torque
+simscape/models/
 ```
-
-<!-- Add later:
-![Simscape robot model](media/simulation/simscape_model.png)
--->
 
 ---
 
 # MATLAB vs Simscape Validation
 
-The same test trajectories were simulated using both:
+The same robot motions were evaluated using:
 
 ```text
-Analytical / MATLAB Model
-             ↕
-      Comparison
-             ↕
-Simscape Multibody Model
+MATLAB Dynamic Model
+        ↕
+   Comparison
+        ↕
+Simscape Multibody
 ```
 
-Joint-torque profiles were compared between the two implementations.
+Joint torque trends from both modelling approaches were compared.
 
-The objective was not to claim perfect numerical equivalence, but to use two modelling approaches to inspect whether the predicted dynamic behaviour and torque trends were consistent.
+The purpose was to cross-check the analytical/dynamic implementation against the multibody simulation rather than claim exact numerical equivalence.
 
-Comparisons were performed for the task trajectories as well as selected payload cases.
-
-<!-- Add later:
-![MATLAB vs Simscape torque comparison](media/results/matlab_vs_simscape_torque.png)
--->
+![MATLAB vs Simscape joint torque comparison](media/results/matlab_vs_simscape_torque.jpeg)
 
 ---
 
 # Payload Analysis
 
-Payload sensitivity was evaluated across multiple cases, including:
+Payload influence was evaluated for:
 
 - **0 kg**
 - **0.5 kg**
 - **0.75 kg**
 - **1.0 kg**
 
-For each case, joint-torque requirements were evaluated along the task motion.
+The analysis showed how loading affected the required torque across the manipulator joints.
 
-This allowed the influence of payload on the most highly loaded joints to be visualised.
+### No Payload
 
-<!-- Add later:
-![0 kg payload torque](media/results/torque_0kg.png)
-![0.5 kg payload torque](media/results/torque_05kg.png)
-![0.75 kg payload torque](media/results/torque_075kg.png)
-![1 kg payload torque](media/results/torque_1kg.png)
--->
+![Torque — no payload](media/results/torque_payload_0kg.jpeg)
 
-The payload study did **not** indicate that the robot fundamentally failed at the higher tested payloads.
+### 0.5 kg Payload
 
-Instead, the analysis was used as part of actuator and transmission evaluation.
+![Torque — 0.5 kg payload](media/results/torque_payload_05kg.jpeg)
+
+### 0.75 kg Payload
+
+![Torque — 0.75 kg payload](media/results/torque_payload_075kg.jpeg)
+
+### 1.0 kg Payload
+
+![Torque — 1 kg payload](media/results/torque_payload_1kg.jpeg)
+
+The tested payload cases remained part of the actuator/transmission design study; the heavier cases were not treated as robot failure cases.
 
 ---
 
 # Motor & Transmission Analysis
 
-The required joint torques were compared against candidate Mitsubishi servo-motor capabilities.
+Required joint torque was compared against candidate Mitsubishi servo-motor capabilities.
 
-A belt/transmission reduction study was also performed.
+Transmission reductions were then considered to reduce required motor-side torque and provide design margin.
 
-The purpose was to evaluate how transmission ratios affected motor-side torque requirements and provide additional design margin.
+The study considered:
 
-The study included:
-
-- joint-torque requirements
-- transmission reductions
-- rated motor torque
-- maximum motor torque
+- rated torque
+- maximum torque
+- joint torque
+- transmission reduction
 - motor power
-- worst-case task loading
-- 1 kg payload case
+- payload
+- worst-case trajectory loading
 
-<!-- Add later:
-![Torque with transmission reduction](media/results/torque_transmission_1kg.png)
+## Torque with Transmission Reduction
 
-![Motor power](media/results/motor_power_1kg.png)
--->
+![Torque with transmission reduction](media/results/torque_with_transmission_1kg.jpeg)
 
-The exact final motor part numbers and reduction ratios are not reproduced here because they have not yet been recovered from the archived project material.
+## Motor Power
 
----
+![Motor power](media/results/motor_power_1kg.jpeg)
 
-# Physical Industrial-Robotics Laboratory
-
-The second part of the project involved a **TM collaborative robot** equipped with interchangeable tooling and an integrated vision system.
-
-The exact robot model is not claimed here because it has not yet been recovered from the surviving project records.
-
-Programming was performed using the **TM Robot block-based programming and vision environment**.
-
-The laboratory work focused on practical robot programming, manipulation, computer vision, accuracy and repeatability.
-
-![TM collaborative robot laboratory setup](media/lab/tm_robot_setup.jpg)
+The exact final motor part numbers and transmission ratios have not yet been recovered from the archived project material, so they are intentionally not reconstructed from memory here.
 
 ---
 
-# Block-Based Robot Programming
+# Physical TM Collaborative-Robot Laboratory
 
-The physical robot was programmed using graphical/block-based logic rather than conventional text-based source code.
+The second part of the project involved practical industrial-robot programming using a **TM collaborative robot**.
 
-The programming environment provided robot-control operations including concepts such as:
+The exact robot model has not yet been recovered from the original course documentation.
 
-- move
-- repeat
-- conditional logic
-- branching
-- sequence control
-- vision operations
+Programming used the TM Robot graphical/block-based control and vision environment.
 
-This allowed manipulation behaviours to be constructed as task sequences.
-
-The block-based implementation should therefore not be interpreted as conventional Python/C++ robot programming.
+![TM collaborative robot setup](media/lab/tm_robot_setup.jpeg)
 
 ---
 
-# Pick-and-Place Task
+# Pick-and-Place
 
-One laboratory task involved moving objects between **six predefined source positions and six destination positions**.
+One task required the robot to move objects between **six predefined source positions and six destination positions**.
 
-The object locations were predefined rather than vision-detected.
+The positions were predefined rather than detected with vision.
 
-The programmed sequence controlled:
+The programmed sequence was:
 
 ```text
-Approach Source
-       ↓
-Pick Object
-       ↓
-Move to Destination
-       ↓
-Place Object
-       ↓
-Repeat for Remaining Objects
+Approach
+   ↓
+Pick
+   ↓
+Transfer
+   ↓
+Place
+   ↓
+Repeat
 ```
 
-I participated directly in programming and testing this task.
-
-<!-- Add trimmed video later:
-[Watch the pick-and-place demonstration](media/lab/pick_and_place.mp4)
--->
+[▶ Watch the pick-and-place demonstration](media/lab/pick_and_place.mp4)
 
 ---
 
-# Vision-Based Tic-Tac-Toe
+# Machine Vision & Tic-Tac-Toe
 
-A later exercise introduced machine vision.
+The integrated vision system was used for pattern-based object detection.
 
-The TM vision system was used for image-pattern detection.
-
-I configured vision parameters including:
+I configured parameters including:
 
 - pattern selection
-- search region
-- minimum matching score / confidence
+- search range
+- minimum matching score
 - rotation handling
-- image-pyramid settings
+- image-pyramid layers
 
-The vision interface returned information such as:
+The system returned:
 
-- image-space `X`
-- image-space `Y`
-- object rotation
-- detection score
+- image-space X
+- image-space Y
+- rotation
+- matching score
 
-This information was used in the robot-task logic to determine the relevant object/board state and where the robot should place its next element.
+![TM vision pattern detection](media/lab/tm_vision_detection.jpeg)
 
-<!-- Add later:
-![TM vision pattern detection](media/lab/tm_vision_detection.jpg)
--->
-
-The task demonstrated practical integration of:
+The detected state was then used by the block-based task logic to determine where the robot should place its next piece.
 
 ```text
 Camera
    ↓
 Pattern Detection
    ↓
-Detection Parameters
+Position / Rotation / Score
    ↓
-Position / Orientation
+Task Logic
    ↓
-Robot Decision Logic
-   ↓
-Manipulation
+Robot Motion
 ```
 
-<!-- Add trimmed video later:
-[Watch the tic-tac-toe experiment](media/lab/tic_tac_toe.mp4)
--->
+[▶ Watch the tic-tac-toe demonstration](media/lab/tic_tac_toe.mp4)
 
 ---
 
-# Contact Drawing Experiment
+# Contact Drawing
 
-Another task used a pencil mounted at the robot end effector to draw a helmet-related shape.
+Another laboratory exercise used a pencil attached to the robot end effector.
 
-The primary challenge was maintaining appropriate contact with the drawing surface.
+The goal was to follow a drawing path while maintaining suitable contact with the surface.
 
-No dedicated force-control measurement was used.
+Dedicated force sensing was not used for this task.
 
-Instead, contact was established experimentally by tuning the robot pose and end-effector depth.
+Contact was instead tuned experimentally through:
 
-This exercise therefore investigated practical issues including:
-
-- positioning accuracy
-- trajectory following
+- robot pose
 - tool orientation
-- contact depth
-- surface interaction
+- Z-depth
+- trajectory accuracy
+
+This exercise highlighted the practical difference between free-space positioning and surface-contact manipulation.
 
 ---
 
-# Final Helmet-Visor Automation Task
+# Final Helmet-Visor Task
 
-The final physical laboratory exercise brought several of the earlier skills together.
+The final laboratory exercise combined manipulation, inspection and contact operations.
 
-The robot performed a sequence involving visor manipulation, camera inspection and stamping.
-
-The programmed task sequence was approximately:
+The programmed sequence was:
 
 ```text
-Start Position
-      ↓
+Start
+  ↓
 Approach Helmet
-      ↓
+  ↓
 Open Visor
-      ↓
-Reposition / Rotate
-      ↓
+  ↓
+Rotate / Reposition
+  ↓
 Close Visor
-      ↓
+  ↓
 Position Camera at Hinge
-      ↓
+  ↓
 Capture Inspection View
-      ↓
+  ↓
 Return to Start
-      ↓
-Repeat at Increasing Speed
-      ↓
+  ↓
+Repeat at Higher Speeds
+  ↓
 Move to Stamp
-      ↓
-Dip / Prepare Stamp
-      ↓
+  ↓
+Dip Stamp
+  ↓
 Apply Stamp to Helmet
-      ↓
+  ↓
 Repeat at Different Angles
 ```
 
-The visor sequence was repeated **three times at progressively higher speeds** to assess whether the programmed manipulation remained reliable.
+The visor sequence was repeated **three times at progressively higher speeds** to observe whether the manipulation remained successful.
 
-The stamping operation was subsequently repeated with different robot orientations.
+The stamping operation was then repeated at different robot orientations.
 
-The evaluation was based primarily on **successful physical task execution and visual observation**.
+Evaluation was primarily based on successful physical task execution and visual observation.
 
-No formal quantitative measurements of force, positioning error or cycle-time repeatability were recorded.
+Formal quantitative measurements of force, positioning error and repeatability were not recorded.
 
-<!-- Add trimmed final video later:
-[Watch the final visor-manipulation task](media/lab/helmet_visor_task.mp4)
--->
+[▶ Watch the final helmet-visor task](media/lab/helmet_visor_task.mp4)
 
 ---
 
-# Implemented vs Not Quantitatively Evaluated
+# What Was Implemented
 
 | Component | Status |
 |---|---|
-| Custom 4-DOF robot architecture | ✅ Implemented |
-| SolidWorks CAD development | ✅ Implemented |
+| 4-DOF manipulator design | ✅ Implemented |
+| CAD development | ✅ Implemented |
 | Forward kinematics | ✅ Implemented |
-| Position Jacobian | ✅ Implemented |
-| Workspace sampling | ✅ Implemented |
+| Jacobian | ✅ Implemented |
+| Task-specific inverse kinematics | ✅ Implemented |
+| Workspace analysis | ✅ Implemented |
 | Manipulability analysis | ✅ Implemented |
-| Inverse kinematics | ✅ Implemented |
 | Dynamic model | ✅ Implemented |
 | MATLAB trajectory generation | ✅ Implemented |
-| MATLAB torque calculation | ✅ Implemented |
 | Simscape Multibody model | ✅ Implemented |
-| CAD geometry import | ✅ Implemented |
-| Position / torque sensing in Simscape | ✅ Implemented |
+| CAD import into Simscape | ✅ Implemented |
 | MATLAB-vs-Simscape comparison | ✅ Implemented |
-| Payload study up to 1 kg | ✅ Implemented |
-| Motor / transmission study | ✅ Performed |
+| Payload analysis up to 1 kg | ✅ Implemented |
+| Motor/transmission study | ✅ Performed |
 | TM robot pick-and-place | ✅ Demonstrated |
-| TM machine-vision experiment | ✅ Demonstrated |
+| Machine-vision configuration | ✅ Demonstrated |
 | Tic-tac-toe task | ✅ Demonstrated |
 | Contact drawing | ✅ Demonstrated |
-| Physical visor manipulation | ✅ Demonstrated |
+| Visor manipulation | ✅ Demonstrated |
 | Hinge imaging | ✅ Demonstrated |
-| Stamping task | ✅ Demonstrated |
+| Stamping/contact task | ✅ Demonstrated |
 | Quantitative real-robot force validation | ❌ Not performed |
-| Quantitative real-robot positioning error | ❌ Not recorded |
-| Formal real-robot repeatability study | ❌ Not recorded |
-
----
-
-# Engineering Limitations
-
-## Simulation Parameters
-
-Some original project metadata has not yet been recovered, including:
-
-- final documented joint-limit configuration
-- exact final Mitsubishi motor part numbers
-- exact final transmission ratios
-
-These values are therefore intentionally not stated rather than reconstructed from memory.
-
-## Physical Robot Identification
-
-The laboratory hardware was a **TM collaborative robot**, but the exact model number has not yet been recovered.
-
-## Software Identification
-
-The physical laboratory used the TM Robot programming and vision environment.
-
-The exact software product/version is not stated until it can be confirmed from the original course material.
-
-## Physical Validation
-
-The laboratory experiments were evaluated primarily through successful task completion.
-
-The project did not record a complete quantitative dataset for:
-
-- contact force
-- absolute positioning error
-- repeatability
-- cycle time
-- force/torque profiles on the real robot
-
----
-
-# Technology Stack
-
-## Modelling & Simulation
-
-- MATLAB
-- Simulink
-- Simscape Multibody
-- SolidWorks
-
-## Robotics
-
-- forward kinematics
-- inverse kinematics
-- Jacobians
-- workspace analysis
-- manipulability
-- robot dynamics
-- trajectory planning
-- torque analysis
-- payload analysis
-- motor/transmission sizing
-
-## Industrial Robotics
-
-- TM collaborative robot
-- block-based robot programming
-- pick-and-place
-- machine vision
-- pattern detection
-- tool interaction
-- contact tasks
-- inspection trajectories
+| Formal real-robot positioning-error study | ❌ Not recorded |
+| Formal repeatability dataset | ❌ Not recorded |
 
 ---
 
 # Repository Structure
-
-The repository is being reconstructed from the surviving academic project files.
 
 ```text
 industrial-robotics-visor-automation/
@@ -709,18 +605,29 @@ industrial-robotics-visor-automation/
 ├── .gitignore
 │
 ├── matlab/
-│   ├── kinematics/
+│   ├── analysis/
 │   ├── dynamics/
-│   ├── trajectory/
-│   └── analysis/
+│   ├── kinematics/
+│   └── trajectory/
 │
 ├── simscape/
-│   ├── Project_Simscape.slx
 │   ├── Simscape_Values.m
-│   └── Trapezoidal_signal.mat
+│   ├── Trapezoidal_signal.mat
+│   ├── models/
+│   │   ├── Project_Simscape.slx
+│   │   └── SCARA_Simscape.slx
+│   └── data/
 │
 ├── cad/
-│   └── solidworks/
+│   ├── solidworks/
+│   │   └── Arm_022.SLDPRT
+│   └── step/
+│       ├── Arm_00_Assembly.STEP
+│       ├── Arm_00_Assembly_2.STEP
+│       ├── Arm_01_Assembly.STEP
+│       ├── Arm_02_Assembly.STEP
+│       ├── Base_Assembly.STEP
+│       └── Gripper_Assembly.STEP
 │
 └── media/
     ├── simulation/
@@ -728,38 +635,103 @@ industrial-robotics-visor-automation/
     └── lab/
 ```
 
-Generated Simulink cache files, autosave files and temporary build artefacts are intentionally excluded from version control.
+Generated Simulink caches, build artefacts and autosave files are excluded from version control.
 
 ---
 
-# What This Project Demonstrates
+# Running the Archived Project
 
-For robotics, simulation and industrial-automation roles, this project demonstrates experience with:
+This repository has been reconstructed from the surviving academic project files.
+
+The original MATLAB release and complete original development environment have not yet been recovered.
+
+At minimum, the project requires:
+
+- MATLAB
+- Simulink
+- Simscape
+- Simscape Multibody
+
+Start with the Simscape models in:
+
+```text
+simscape/models/
+```
+
+and the MATLAB code under:
+
+```text
+matlab/
+```
+
+Some archived scripts may require path adjustments depending on where the repository is cloned.
+
+The STEP files in:
+
+```text
+cad/step/
+```
+
+provide software-independent CAD geometry for inspection or import into compatible CAD tools.
+
+---
+
+# Limitations
+
+Several original project details have not yet been recovered:
+
+- exact final joint-limit configuration
+- exact Mitsubishi motor part numbers
+- exact transmission ratios
+- exact TM collaborative-robot model
+- exact TM software version
+- original MATLAB release
+
+These values are intentionally left unspecified instead of being reconstructed from memory.
+
+The physical laboratory experiments were assessed primarily through successful task execution rather than a formal quantitative performance dataset.
+
+---
+
+# Team Work & Attribution
+
+This repository contains material originating from a **three-person academic team project**.
+
+The **My Contributions** section identifies the areas I personally worked on.
+
+The repository also preserves original team-generated project files and naming conventions where useful for reproducibility. The presence of a file in this repository should therefore not automatically be interpreted as a claim of sole individual authorship.
+
+No third-party or university-owned source code is intentionally presented here as my own work.
+
+---
+
+# Skills Demonstrated
+
+This project provides evidence of experience in:
 
 - robot kinematics
-- forward and inverse kinematics
-- Jacobian modelling
-- manipulability analysis
+- inverse kinematics
+- Jacobians
 - workspace analysis
-- robot dynamics
+- manipulability
+- dynamics
 - trajectory planning
 - MATLAB
 - Simulink
 - Simscape Multibody
 - SolidWorks
-- simulation validation
+- CAD integration
 - torque analysis
 - payload analysis
-- actuator / transmission evaluation
-- collaborative robots
-- industrial manipulation
-- block-based robot programming
+- actuator sizing
+- transmission analysis
+- collaborative robotics
+- industrial robot programming
 - machine vision
 - pick-and-place
 - contact tasks
-- inspection tasks
+- robot inspection tasks
 - physical robot testing
-- simulation-to-hardware engineering workflows
 
 ---
 
@@ -767,6 +739,6 @@ For robotics, simulation and industrial-automation roles, this project demonstra
 
 ✅ **Completed academic robotics project**
 
-The simulation, modelling and physical laboratory exercises were completed.
+The principal simulation, analysis and physical laboratory tasks are complete.
 
-Some original metadata and project files are still being recovered. Missing values are intentionally left undocumented rather than inferred or reconstructed without evidence.
+This repository is a cleaned and documented reconstruction of the original project archive.
